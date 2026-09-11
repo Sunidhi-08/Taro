@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local fallback storage and generated evaluation output
+/data/*.json
+/kits.json
+
 # vercel
 .vercel
 
