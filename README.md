@@ -1,66 +1,87 @@
 # Taro Interview Kit
 
-Taro is a full-stack interview preparation application. A user supplies a company or job URL, pastes a job description, and chooses the number of days before the interview. Taro turns that input into a structured preparation kit containing requirements, interview questions, flashcards, and a daily study schedule.
+> Turn a job description into a focused interview plan.
 
-## What I Built
+Taro is a full-stack interview preparation workspace for candidates who want more structure than a collection of browser tabs and scattered notes. Add a job description, research source, and interview date. Taro organizes the role into requirements, questions, flashcards, and a daily preparation schedule.
 
-- Registration, login, logout, and cookie-based sessions
-- MongoDB Atlas persistence for users and interview kits
-- Dashboard showing a user's saved kits
-- Custom kit creation form with URL, job description, and selectable preparation days
-- Requirement extraction with must-have and nice-to-have priorities
-- Company research through the supplied URL
-- Deterministic interview question and flashcard generation
-- Must-have coverage checking and fallback questions
-- Day-by-day preparation schedule
-- Interactive practice mode with flashcard scoring
-- Kit builder view with requirements, questions, schedule, and practice links
-- Health endpoint for checking MongoDB connectivity
-- Automated tests and batch evaluation script
+## Product Preview
 
-## Technology
+```text
+Job description + company URL
+              |
+              v
+       Research and extraction
+              |
+              v
+ Requirements -> Questions -> Flashcards
+              |
+              v
+       Personal study schedule
+```
 
-- Next.js App Router
-- TypeScript
-- React
-- Tailwind CSS
-- MongoDB Atlas with Mongoose/MongoDB driver
-- bcryptjs for password hashing
-- Cheerio for company-page text extraction
-- Optional Gemini integration through `GEMINI_API_KEY`
+## Highlights
+
+| Experience | What it does |
+| --- | --- |
+| Personal workspace | Create an account and keep interview kits private to your profile. |
+| Kit builder | Review extracted requirements, interview questions, and source context in one place. |
+| Preparation timeline | Select the number of days available and receive a day-by-day plan. |
+| Practice mode | Review flashcards, reveal answers, and save confidence scores from 1 to 5. |
+| Coverage checks | Prioritize must-have requirements and generate fallback questions when coverage is incomplete. |
+| Research pipeline | Extract useful company context from the supplied website with a deterministic fallback. |
+
+## Built With
+
+- **Next.js** App Router and server API routes
+- **TypeScript** across the application and core generation logic
+- **React** client experiences for the dashboard and practice mode
+- **Tailwind CSS** for the interface
+- **MongoDB Atlas** for users, kits, and practice progress
+- **Mongoose and MongoDB driver** for connection and persistence
+- **Cheerio** for lightweight company-page extraction
+- **bcryptjs** for password hashing
+- Optional **Gemini** integration for company brief generation
+
+## How It Works
+
+1. A candidate registers and signs in.
+2. They add a company or job URL and paste the job description.
+3. They choose how many days remain before the interview.
+4. Taro extracts technical, domain, and behavioural requirements.
+5. The generation pipeline builds questions and checks must-have coverage.
+6. Questions become flashcards and are distributed across the selected days.
+7. The candidate studies, scores cards, and returns to the kit when needed.
 
 ## Project Structure
 
 ```text
 app/
-  api/                 Authentication, health, and kit API routes
-  dashboard/           User dashboard and kit creation form
+  api/                 Auth, health, and interview-kit API routes
+  dashboard/           Personal workspace and kit creation
   kit/[id]/            Kit builder and study schedule
   practice/[id]/       Interactive flashcard practice
-  login/               Login page
-  register/            Registration page
+  login/               Login experience
+  register/            Registration experience
 lib/
   auth.ts              Session and current-user helpers
-  interview-kit.ts     Requirement, question, coverage, and schedule logic
+  interview-kit.ts     Extraction, coverage, questions, and scheduling
   llm.ts               Optional AI brief generation with fallback
-  mongo.ts             MongoDB connection helper
-  pipeline.ts           Scraping and kit-generation pipeline
-  scraper.ts            Company-site text extraction
-  store.ts              MongoDB-first persistence with local fallback
-tests/                 Automated interview-kit tests
-scripts/evaluate.ts     Batch evaluator
+  mongo.ts             MongoDB connection management
+  pipeline.ts          Research and kit-generation orchestration
+  scraper.ts           Company-site text extraction
+  store.ts              MongoDB-first persistence layer
+tests/                 Core generation tests
+scripts/evaluate.ts     Batch evaluation utility
 ```
 
 ## Run Locally
-
-Use the project directory, not its parent folder:
 
 ```powershell
 cd "D:\Downloads\Taro\taro"
 npm install
 ```
 
-Create `.env.local`:
+Create `.env.local` from `.env.example`:
 
 ```env
 MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/Taro?retryWrites=true&w=majority
@@ -69,37 +90,19 @@ GEMINI_API_KEY=
 NODE_ENV=development
 ```
 
-If the MongoDB password contains special characters, URL-encode them. For example, `@` becomes `%40`.
+If the password contains special characters, URL-encode them. For example, `@` becomes `%40`.
 
-Start the application:
+Start the app:
 
 ```powershell
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open [http://localhost:3000](http://localhost:3000).
 
-## User Flow
+## Data and Health Check
 
-1. Open `/register` and create an account.
-2. The account is saved in MongoDB Atlas under `Taro.users`.
-3. Open the dashboard and choose **Add interview kit**.
-4. Enter a company URL and paste the full job description.
-5. Select the number of preparation days.
-6. Create the kit.
-7. Open the kit builder to review requirements, questions, and the study plan.
-8. Open practice mode and score flashcards from 1 to 5.
-9. The kit and practice scores are saved in MongoDB under `Taro.kits`.
-
-## Verify MongoDB
-
-With the development server running, visit:
-
-```text
-http://localhost:3000/api/health
-```
-
-Successful response:
+With the app running, open `/api/health`. A healthy connection returns:
 
 ```json
 {
@@ -109,28 +112,33 @@ Successful response:
 }
 ```
 
-If the database is disconnected, check the Atlas database user password and Network Access allowlist.
+MongoDB stores users in `Taro.users` and interview kits in `Taro.kits`. The application keeps a local JSON fallback for development environments where MongoDB is not configured.
 
-## Automated Verification
+Never commit `.env.local`, database passwords, or API keys.
+
+## Testing
+
+Run the core test suite:
 
 ```powershell
-cd "D:\Downloads\Taro\taro"
-npm run build
 npm test
-npm run evaluate -- cases.json kits.json
 ```
 
-The current test suite covers requirement extraction, must-have coverage, schedule distribution, and complete kit generation.
+Run a production build:
 
-## Batch Evaluation
+```powershell
+npm run build
+```
 
-Run the evaluator with the included sample cases:
+Run the batch evaluator:
 
 ```powershell
 npm run evaluate -- cases.json kits.json
 ```
 
-Example case:
+The tests cover requirement extraction, must-have coverage, schedule distribution, and complete kit generation.
+
+## Example Input
 
 ```json
 [
@@ -142,33 +150,10 @@ Example case:
 ]
 ```
 
-## Deploy to Vercel
+## Design Direction
 
-1. Push this project to a GitHub repository.
-2. Import the repository into Vercel.
-3. Add these Vercel environment variables:
+Taro uses a calm, focused workspace aesthetic: dark surfaces reduce visual noise during study sessions, cyan accents identify actions and progress, and compact cards keep requirements scannable. The dashboard is designed around the repeated candidate workflow: create a kit, compare priorities, open practice, and return to the schedule.
 
-```env
-MONGODB_URI=your-mongodb-atlas-connection-string
-SESSION_SECRET=your-production-secret
-GEMINI_API_KEY=optional-gemini-key
-NODE_ENV=production
-```
+## Status
 
-4. In MongoDB Atlas, add the required Vercel network access rule.
-5. Deploy and test registration, kit creation, and practice mode on the live URL.
-
-Never commit `.env.local`, database passwords, or API keys. Use `.env.example` as the safe configuration template.
-
-## Assignment Submission Checklist
-
-- GitHub repository URL
-- Hosted Vercel project URL
-- Frontend repository URL
-- Backend repository URL, or the same full-stack repository if frontend and backend are combined
-- GitHub profile URL
-- LinkedIn profile URL
-- Public resume link
-- Public or unlisted demo video link
-
-For the demo video, show registration, dashboard, custom kit creation, selectable preparation days, generated questions, schedule, and practice scoring.
+Taro is an active portfolio project with a working authentication flow, MongoDB persistence, generation pipeline, dashboard, kit builder, and practice experience.
